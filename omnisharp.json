@@ -1,0 +1,62 @@
+{
+    "FormattingOptions": {
+        "NewLine": "\n",
+        "UseTabs": false,
+        "TabSize": 4,
+        "IndentationSize": 4,
+        //Spacing - Declarations
+        "SpacingAfterMethodDeclarationName": false,
+        "SpaceWithinMethodDeclarationParenthesis": false,
+        "SpaceBetweenEmptyMethodDeclarationParentheses": false,
+        //Spacing - Calls
+        "SpaceAfterMethodCallName": false,
+        "SpaceWithinMethodCallParentheses": false,
+        "SpaceBetweenEmptyMethodCallParentheses": false,
+        //Spacing - Other
+        "SpaceAfterControlFlowStatementKeyword": true,
+        "SpaceWithinExpressionParentheses": false,
+        "SpaceWithinCastParentheses": false,
+        "SpaceWithinOtherParentheses": false,
+        "SpaceAfterCast": false,
+        "SpacesIgnoreAroundVariableDeclaration": false,
+        //Spacing - Brackets
+        "SpaceBeforeOpenSquareBracket": false,
+        "SpaceBetweenEmptySquareBrackets": false,
+        "SpaceWithinSquareBrackets": false,
+        //Spacing - Delimiters
+        "SpaceAfterColonInBaseTypeDeclaration": true,
+        "SpaceAfterComma": true,
+        "SpaceAfterDot": false,
+        "SpaceAfterSemicolonsInForStatement": true,
+        "SpaceBeforeColonInBaseTypeDeclaration": true,
+        "SpaceBeforeComma": false,
+        "SpaceBeforeDot": false,
+        "SpaceBeforeSemicolonsInForStatement": false,
+        //Spacing - Operators
+        "SpacingAroundBinaryOperator": "single",
+        //Indendation
+        "IndentBlock": true,
+        "IndentBraces": false,
+        "IndentSwitchSection": true,
+        "IndentSwitchCaseSection": true,
+        "LabelPositioning": "oneLess",
+        "WrappingPreserveSingleLine": true,
+        "WrappingKeepStatementsOnSingleLine": true,
+        //New Lines
+        "NewLinesForBracesInTypes": true,
+        "NewLinesForBracesInMethods": true,
+        "NewLinesForBracesInProperties": false,
+        "NewLinesForBracesInAccessors": false,
+        "NewLinesForBracesInAnonymousMethods": false,
+        "NewLinesForBracesInControlBlocks": false,
+        "NewLinesForBracesInAnonymousTypes": false,
+        "NewLinesForBracesInObjectCollectionArrayInitializers": false,
+        "NewLinesForBracesInLambdaExpressionBody": false,
+        "NewLineForElse": true,
+        "NewLineForCatch": true,
+        "NewLineForFinally": true,
+        "NewLineForMembersInObjectInit": true,
+        "NewLineForMembersInAnonymousTypes": true,
+        "NewLineForClausesInQuery": true
+    }
+}

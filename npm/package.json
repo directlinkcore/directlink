@@ -1,0 +1,45 @@
+{
+    "name": "directlink-react",
+    "version": "1.0.1",
+    "description": "DirectLink is a library for building single-page web applications that makes the world easier for ASP.NET Core developers who use React.",
+    "author": {
+        "name": "Andrei Molchanov",
+        "email": "molchanov.as@inbox.ru"
+    },
+    "license": "Apache 2.0",
+    "homepage": "https://directlink.info",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/directlinkcore/directlink"
+    },
+    "issues": "",
+    "keywords": [
+        "directlink",
+        "react",
+        "signalr",
+        "aspnet.core",
+        "server-side rendering",
+        "server-side routing",
+        "real-time communications"
+    ],
+    "main": "src/directlink-react.js",
+    "scripts": {
+        "prepublishOnly": "eslint src/** && webpack",
+        "lint": "eslint src/**",
+        "build": "webpack"
+    },
+    "dependencies": {
+        "lodash": "^4.17.4",
+        "react": "^16.0.0",
+        "react-dom": "^16.0.0"
+    },
+    "devDependencies": {
+        "babel-core": "^6.26.0",
+        "babel-eslint": "^8.0.3",
+        "babel-loader": "^7.1.2",
+        "babel-preset-es2015": "^6.24.1",
+        "eslint": "^4.13.1",
+        "eslint-plugin-react": "^7.5.1",
+        "webpack": "^3.10.0"
+    }
+}

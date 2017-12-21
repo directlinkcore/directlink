@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>Andrei Molchanov</Authors>
+        <Description>DirectLink is a library for building single-page web applications that makes the world easier for ASP.NET Core developers who use React.</Description>
+        <Copyright>Andrei Molchanov</Copyright>
+        <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+        <RootNamespace>DirectLinkCore</RootNamespace>
+        <PackageProjectUrl>https://directlink.info</PackageProjectUrl>
+        <PackageIconUrl>https://raw.githubusercontent.com/directlinkcore/directlink/master/content/images/impossible-cubes-64.png</PackageIconUrl>
+        <RepositoryUrl>https://github.com/directlinkcore/directlink</RepositoryUrl>
+        <RepositoryType></RepositoryType>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/directlinkcore/directlink/master/LICENSE.txt</PackageLicenseUrl>
+        <PackageTags>directlink react signalr aspnetcore</PackageTags>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="Content\favicon.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Content\favicon.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
+        <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+        <PackageReference Include="System.Security.Claims" Version="4.3.0" />
+        <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    </ItemGroup>
+
+</Project>
