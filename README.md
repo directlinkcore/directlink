@@ -85,6 +85,7 @@ module.exports = [{
 }];
 ```
 </details>
+<br>
 
 Add service and configure pipeline in `Startup.cs`:
 ```csharp
@@ -158,12 +159,12 @@ components.App = class App extends React.Component {
         return (
             <div className="jumbotron">
                 <div className="row mb-3">
-                    <div className="col col-12 col-sm-8 col-md-9 col-lg-10 mb-3 mb-sm-0">
+                    <div className="col-12 col-sm-8 col-md-9 col-lg-10 mb-3 mb-sm-0">
                         <input type="text" className="form-control" name="message"
                             placeholder="message" autoComplete="off"
                             value={this.state.message} onChange={this.onChange} onKeyPress={this.onKeyPress} />
                     </div>
-                    <div className="col col-12 col-sm-4 col-md-3 col-lg-2">
+                    <div className="col-12 col-sm-4 col-md-3 col-lg-2">
                         <button type="button" className="btn btn-primary w-100"
                             onClick={this.sendMessage}>Send</button>
                     </div>
