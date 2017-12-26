@@ -117,8 +117,8 @@ namespace DirectLinkCore
                 }
             }
 
-            var router = link as IInternalDirectLinkRouter<RouterViewModel>;
-            if (router?.Routes == null) {
+            var routes = Routes.Get(_entryType);
+            if (routes == null) {
                 data.IsRouted = true;
                 data.Title = context.Title;
                 return data;
@@ -128,7 +128,7 @@ namespace DirectLinkCore
             while (true) {
                 args = null;
                 Route nextRoute = null;
-                foreach (var route in router.Routes) {
+                foreach (var route in routes) {
                     if (route.Regex == null) {
                         if (restPath.StartsWith(route.Template) || (restPath == "" || restPath == "/") && route.Default) {
                             nextRoute = route;
@@ -196,8 +196,8 @@ namespace DirectLinkCore
                         break;
                     }
 
-                    router = link as IInternalDirectLinkRouter<RouterViewModel>;
-                    if (router?.Routes == null) {
+                    routes = Routes.Get(nextRoute.Type);
+                    if (routes == null) {
                         if (restPath == "/") {
                             routedPath += "/";
                         }
@@ -208,12 +208,17 @@ namespace DirectLinkCore
                     if (nextRoute.State != null) {
                         data.States.Add(fullname, nextRoute.State);
                     }
-                    else if (args != null) {
-                        var state = new Dictionary<string, object>();
-                        for (int i = 0; i < nextRoute.Parameters.Count; ++i) {
-                            state.Add(nextRoute.Parameters[i].Name, args[i]);
+                    else {
+                        if (args == null) {
+                            data.States.Add(fullname, new Dictionary<string, object>{ { "args", null }});
                         }
-                        data.States.Add(fullname, state);
+                        else {
+                            var values = new Dictionary<string, object>();
+                            for (int i = 0; i < nextRoute.Parameters.Count; ++i) {
+                                values.Add(nextRoute.Parameters[i].Name, args[i]);
+                            }
+                            data.States.Add(fullname, new Dictionary<string, object> { { "args", values } });
+                        }
                     }
                     if (restPath == "/") {
                         routedPath += "/";

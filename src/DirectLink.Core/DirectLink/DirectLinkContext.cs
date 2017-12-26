@@ -10,8 +10,6 @@ namespace DirectLinkCore
 {
     public class DirectLinkContext
     {
-        private readonly ILinkService _linkService;
-
         public HubCallerContext HubCallerContext { get; internal set; }
         public HttpContext HttpContext { get; internal set; }
         public ClaimsPrincipal User { get => this.HttpContext.User; }
@@ -24,9 +22,7 @@ namespace DirectLinkCore
         public string Path { get; internal set; }
         public string HubReferer { get; internal set; }
 
-        public string GetLink<T>(params object[] args) => this.PathBase + _linkService.GetLink<T>(args);
-        public string GetLink(string name, params object[] args) => this.PathBase + _linkService.GetLink(name, args);
-
-        public DirectLinkContext(ILinkService linkService) => _linkService = linkService;
+        public string GetLink<T>(params object[] args) => this.PathBase + Routes.GetLink<T>(args);
+        public string GetLink(string name, params object[] args) => this.PathBase + Routes.GetLink(name, args);
     }
 }

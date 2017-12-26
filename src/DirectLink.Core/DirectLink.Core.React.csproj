@@ -16,7 +16,7 @@
         <RepositoryType></RepositoryType>
         <PackageLicenseUrl>https://raw.githubusercontent.com/directlinkcore/directlink/master/LICENSE.txt</PackageLicenseUrl>
         <PackageTags>directlink react signalr aspnetcore</PackageTags>
-        <Version>1.0.0</Version>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

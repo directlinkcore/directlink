@@ -2,24 +2,67 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DirectLinkCore
 {
-    internal class LinkService : ILinkService
+    public static class Routes
     {
-        private readonly IServiceProvider _provider;
-        private Dictionary<string, List<RoutePathInfo>> _routePaths = new Dictionary<string, List<RoutePathInfo>>();
+        private static readonly ConcurrentDictionary<Type, ICollection<Route>> _routes = new ConcurrentDictionary<Type, ICollection<Route>>();
+        private static Dictionary<string, List<RoutePathInfo>> _routePaths = new Dictionary<string, List<RoutePathInfo>>();
 
-        public string GetLink<T>(params object[] args)
+        public static void For<T>(Action<ICollection<Route>> setupAction) where T : IDirectLinkRouter<RouterViewModel>
+        {
+            var routes = new List<Route>();
+            setupAction(routes);
+            Routes.Set<T>(routes);
+        }
+
+        public static void Set<T>(ICollection<Route> routes) where T : IDirectLinkRouter<RouterViewModel>
+        {
+            Routes.Set(typeof(T), routes);
+        }
+
+        internal static void Set(Type type, ICollection<Route> routes)
+        {
+            routes = routes
+                .OrderByDescending(p => p.Priority)
+                .ThenByDescending(p => p.Template.Length).ToList();
+            _routes[type] = routes;
+            foreach (var route in routes) {
+                _routePaths.TryGetValue(type.Name, out var parentPaths);
+                if (parentPaths != null) {
+                    foreach (var routePathInfo in parentPaths) {
+                        AddOrUpdatePathInfo(route.Name, routePathInfo.AddRoute(route));
+                    }
+                }
+                else {
+                    AddOrUpdatePathInfo(route.Name, new RoutePathInfo().AddRoute(route));
+                }
+            }
+        }
+
+        public static ICollection<Route> Get<T>() where T : IDirectLinkRouter<RouterViewModel>
+        {
+            _routes.TryGetValue(typeof(T), out var routes);
+            return routes;
+        }
+
+        public static ICollection<Route> Get(Type type)
+        {
+            _routes.TryGetValue(type, out var routes);
+            return routes;
+        }
+
+        public static string GetLink<T>(params object[] args)
         {
             return GetLink(typeof(T).Name, args);
         }
 
-        public string GetLink(string name, params object[] args)
+        public static string GetLink(string name, params object[] args)
         {
             _routePaths.TryGetValue(name, out var paths);
             if (paths == null) {
@@ -50,6 +93,10 @@ namespace DirectLinkCore
                                     }
                                 }
                             }
+                            else {
+                                success = false;
+                                continue;
+                            }
                             idx++;
                         }
                         url += template;
@@ -62,37 +109,13 @@ namespace DirectLinkCore
             return null;
         }
 
-        public LinkService(IServiceScopeFactory scopeFactory, DirectLinkOptionsProvider optionsProvider)
+        private static void AddOrUpdatePathInfo(string name, RoutePathInfo routePathInfo)
         {
-            using (var scope = scopeFactory.CreateScope()) {
-                _provider = scope.ServiceProvider;
-                var app = _provider.GetService(optionsProvider.Options.EntryType) as IInternalDirectLinkRouter<RouterViewModel>;
-                if (app?.Routes != null) {
-                    VisitRoutes(app.Routes, new RoutePathInfo());
-                }
-            }
-        }
-
-        private void VisitRoutes(ICollection<Route> routes, RoutePathInfo routePathInfo)
-        {
-            foreach (var route in routes) {
-                if (route.Type != null) {
-                    var router = _provider.GetService(route.Type) as IInternalDirectLinkRouter<RouterViewModel>;
-                    if (router?.Routes != null) {
-                        VisitRoutes(router.Routes, routePathInfo.AddRoute(route));
-                    }
-                }
-                AddOrUpdatePathInfo(routePathInfo.AddRoute(route), route);
-            }
-        }
-
-        private void AddOrUpdatePathInfo(RoutePathInfo routePathInfo, Route route)
-        {
-            if (_routePaths.ContainsKey(route.Name)) {
-                _routePaths[route.Name].Add(routePathInfo);
+            if (_routePaths.ContainsKey(name)) {
+                _routePaths[name].Add(routePathInfo);
             }
             else {
-                _routePaths.Add(route.Name, new List<RoutePathInfo> { routePathInfo });
+                _routePaths.Add(name, new List<RoutePathInfo> { routePathInfo });
             }
         }
 

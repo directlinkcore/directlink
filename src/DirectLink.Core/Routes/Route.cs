@@ -117,9 +117,12 @@ namespace DirectLinkCore
 
         private void SetState(object args)
         {
-            this.State = args?.GetType()
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .ToDictionary(p => p.Name, p => p.GetValue(args, null));
+            if (args != null) {
+                var values = args.GetType()
+                    .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    .ToDictionary(p => p.Name, p => p.GetValue(args, null));
+                this.State = new Dictionary<string, object> { { "args", values } };
+            }
         }
     }
 }

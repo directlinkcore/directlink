@@ -54,7 +54,6 @@ namespace DirectLinkCore
                 if (options.EntryType == null) {
                     throw new InvalidOperationException("EntryType is null. You need to specify EntryType: services.AddDirectLink(options => {{ options.EntryType = typeof(...); }})");
                 }
-
                 if (!typeof(IDirectLink<ViewModel>).IsAssignableFrom(options.EntryType)) {
                     throw new InvalidOperationException("EntryType is not valid. You need to specify correct EntryType");
                 }
@@ -79,11 +78,10 @@ namespace DirectLinkCore
             );
 
             services.AddScoped<IRoutingService, RoutingService>();
-            services.AddSingleton<ILinkService, LinkService>();
 
             var tags = new TemplateTags();
             tagsSetupAction?.Invoke(tags);
-            services.AddScoped(typeof(DirectLinkContext), provider => new DirectLinkContext(provider.GetService<ILinkService>()) {
+            services.AddScoped(typeof(DirectLinkContext), provider => new DirectLinkContext {
                     Tags = new TemplateTags(tags),
                     Data = new Dictionary<string, object>()
                 }
