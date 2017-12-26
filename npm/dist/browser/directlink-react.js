@@ -310,8 +310,10 @@ var directlink = {
                 promise.reject(response && response.StatusCode || 'unexpected result');
             });
             hub.on("AssetsUpdate", function () {
-                directlink.forceUpdate = true;
-                directlink.requestData(window.location.pathname);
+                if (directlink.hmr) {
+                    directlink.forceUpdate = true;
+                    directlink.requestData(window.location.pathname);
+                }
             });
 
             var onClose = function onClose(error) {
@@ -427,8 +429,12 @@ var directlink = {
                 return;
             }
             if (!path.startsWith('/')) {
-                path = '/' + path;
-                if (idx > 0) idx++;
+                var current = directlink.history.current.path;
+                var base = current.substring(0, current.lastIndexOf('/') + (path.length > 0 ? 1 : 0));
+                path = base + path;
+                if (idx > 0) {
+                    idx += base.length;
+                }
             }
             if (idx > 0) {
                 hash = path.substring(idx);
@@ -479,9 +485,6 @@ var directlink = {
 };
 
 var Link = function Link(props) {
-    if (!props.href) {
-        console.error("Link requires 'href' property");
-    }
     return React.createElement("a", {
         style: props.style,
         className: props.className,
