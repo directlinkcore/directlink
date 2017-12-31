@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DirectLinkCore
 {
@@ -16,6 +17,8 @@ namespace DirectLinkCore
         private readonly IServiceProvider _provider;
         private readonly IAuthorizationService _authorizationService;
         private readonly IComponentsService _componentsService;
+        private readonly Task _onStarting;
+        private readonly Func<DataResponse, Task> _onCompleted;
         private readonly Type _entryType;
         private readonly string _notFoundPath;
         private readonly string _notAuthPath;
@@ -32,6 +35,9 @@ namespace DirectLinkCore
             _provider = provider;
             _authorizationService = authorizationService;
             _componentsService = componentsService;
+            var routingEvents = provider.GetService<IRoutingEvents>();
+            _onStarting = routingEvents?.OnStarting() ?? Task.CompletedTask;
+            _onCompleted = data => routingEvents?.OnCompleted(data) ?? Task.CompletedTask;
 
             var options = optionsProvider.Options;
             _entryType = options.EntryType;
@@ -42,6 +48,14 @@ namespace DirectLinkCore
         }
 
         public async Task<DataResponse> GetResponseAsync(DirectLinkContext context)
+        {
+            await _onStarting;
+            var response = await GetResponseInnerAsync(context);
+            await _onCompleted(response);
+            return response;
+        }
+
+        private async Task<DataResponse> GetResponseInnerAsync(DirectLinkContext context)
         {
             try {
                 var data = await GetDataAsync(context.Path, context);
@@ -210,7 +224,7 @@ namespace DirectLinkCore
                     }
                     else {
                         if (args == null) {
-                            data.States.Add(fullname, new Dictionary<string, object>{ { "args", null }});
+                            data.States.Add(fullname, new Dictionary<string, object> { { "args", null } });
                         }
                         else {
                             var values = new Dictionary<string, object>();
