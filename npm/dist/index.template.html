@@ -5,19 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"><% if (typeof(title) != "undefined") { %>
         <title>${ title }</title><% }; if (typeof metaTags !== 'undefined') { metaTags.forEach(tag => { %>
-        ${ tag }<% })}; %>
-        <script>
-            function getCookie(name) {
-                var matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
-                return matches ? decodeURIComponent(matches.pop()) : undefined;
-            }
-            var timestamp = ${ serverTime };
-            var last_timestamp = getCookie("directlink_timestamp") || 0;
-            if (last_timestamp >= timestamp) {
-                location.reload();
-            }
-            document.cookie = "directlink_timestamp = " + timestamp + "; path=/";
-        </script><% if (typeof headTags !== 'undefined') { headTags.forEach(tag => { %>
+        ${ tag }<% })}; if (typeof headTags !== 'undefined') { headTags.forEach(tag => { %>
         ${ tag }<% })}; %>
     </head>
     <body><% if (typeof contentTags !== 'undefined') { contentTags.forEach(tag => { %>

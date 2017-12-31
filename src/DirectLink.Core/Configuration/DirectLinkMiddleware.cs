@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using static DirectLinkCore.DirectLinkContext;
 
 namespace DirectLinkCore
 {
@@ -30,6 +29,7 @@ namespace DirectLinkCore
 
             var response = await routingService.GetResponseAsync(context);
             httpContext.Response.StatusCode = response.StatusCode;
+            httpContext.Response.Headers.Add("Cache-Control", "no-store");
             if (response.Data != null) {
                 var dataJson = JsonConvert.SerializeObject(response.Data);
                 foreach (var style in response.Data.Styles) {
