@@ -3,6 +3,7 @@
 
 module.exports = (callback, wwwroot, data, contextData, cookies) => {
     getCookie = cookie => cookies[cookie];
+    let dataJson = JSON.stringify(data);
     directlink.data = data;
     for (let name in data.Scripts) {
         if (!components.hasOwnProperty(name)) {
@@ -18,7 +19,7 @@ module.exports = (callback, wwwroot, data, contextData, cookies) => {
             }
         })
     );
-    let html = renderIndexHtml(Object.assign({ content: content, data: JSON.stringify(data) }, contextData));
+    let html = renderIndexHtml(Object.assign({ content, data: dataJson }, contextData));
     callback(null, html);
     directlink.data = null;
 };
