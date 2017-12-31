@@ -15,8 +15,8 @@
         <RepositoryUrl>https://github.com/directlinkcore/directlink</RepositoryUrl>
         <RepositoryType></RepositoryType>
         <PackageLicenseUrl>https://raw.githubusercontent.com/directlinkcore/directlink/master/LICENSE.txt</PackageLicenseUrl>
-        <PackageTags>directlink react signalr aspnetcore</PackageTags>
-        <Version>1.0.1</Version>
+        <PackageTags>directlink react signalr net core</PackageTags>
+        <Version>1.0.2</Version>
     </PropertyGroup>
 
     <ItemGroup>

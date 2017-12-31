@@ -17,7 +17,7 @@ namespace DirectLinkCore
             bool hmr = false)
         {
             var min = isDevelopment ? "" : ".min";
-            var directlink = $"https://unpkg.com/directlink-react@1.0.2/dist/browser/directlink-react{min}.js";
+            var directlink = $"https://unpkg.com/directlink-react@1.0.3/dist/browser/directlink-react{min}.js";
             var polyfill = $"https://cdn.polyfill.io/v2/polyfill{min}.js";
             var jquery = $"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery{min}.js";
             var reactVersion = "16.2.0";
