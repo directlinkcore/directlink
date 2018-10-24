@@ -1,6 +1,7 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -38,20 +39,20 @@ namespace DirectLinkCore
         public Task SetStateAsync(string connectionId, string fullname, object state)
         {
             return DirectLinkHub.HubContext
-                .Clients.Client(connectionId).InvokeAsync(nameof(IDirectLinkHub.SetState), new object[] { fullname, state });
+                .Clients.Client(connectionId).SendAsync(nameof(IDirectLinkHub.SetState), fullname, state);
         }
 
         public Task SetStateAsync(string group, object state)
         {
             return DirectLinkHub.HubContext
-                .Clients.Group(group).InvokeAsync(nameof(IDirectLinkHub.SetState), new object[] { group, state });
+                .Clients.Group(group).SendAsync(nameof(IDirectLinkHub.SetState), group, state);
         }
 
         public async Task SetStateAsync(object state)
         {
             foreach (var group in this.Connections.Keys) {
                 await DirectLinkHub.HubContext
-                    .Clients.Group(group).InvokeAsync(nameof(IDirectLinkHub.SetState), new object[] { group, state });
+                    .Clients.Group(group).SendAsync(nameof(IDirectLinkHub.SetState), group, state);
             }
         }
 
@@ -59,20 +60,20 @@ namespace DirectLinkCore
         public Task InvokeAsync(string connectionId, string fullname, string method, object[] args = null)
         {
             return DirectLinkHub.HubContext
-                .Clients.Client(connectionId).InvokeAsync(nameof(IDirectLinkHub.Invoke), new object[] { fullname, method, args });
+                .Clients.Client(connectionId).SendAsync(nameof(IDirectLinkHub.Invoke), fullname, method, args);
         }
 
         public Task InvokeAsync(string group, string method, object[] args = null)
         {
             return DirectLinkHub.HubContext
-                .Clients.Group(group).InvokeAsync(nameof(IDirectLinkHub.Invoke), new object[] { group, method, args });
+                .Clients.Group(group).SendAsync(nameof(IDirectLinkHub.Invoke), group, method, args);
         }
 
         public async Task InvokeAsync(string method, object[] args = null)
         {
             foreach (var group in this.Connections.Keys) {
                 await DirectLinkHub.HubContext
-                    .Clients.Group(group).InvokeAsync(nameof(IDirectLinkHub.Invoke), new object[] { group, method, args });
+                    .Clients.Group(group).SendAsync(nameof(IDirectLinkHub.Invoke), group, method, args);
             }
         }
     }

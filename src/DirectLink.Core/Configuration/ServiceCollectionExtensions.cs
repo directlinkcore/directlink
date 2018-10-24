@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -38,11 +38,10 @@ namespace DirectLinkCore
             Action<TemplateTags> tagsSetupAction = null,
             IEnumerable<Assembly> assemblies = null)
         {
-            services.AddSignalR(options => {
-                options.JsonSerializerSettings = new JsonSerializerSettings {
+            services.AddSignalR()
+                .AddJsonProtocol(options => options.PayloadSerializerSettings = new JsonSerializerSettings {
                     ContractResolver = new DefaultContractResolver()
-                };
-            });
+                });
 
             services.AddSingleton(typeof(DirectLinkOptionsProvider), provider => {
                 var options = GetDefaultOptions();

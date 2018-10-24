@@ -1,6 +1,6 @@
 {
     "name": "directlink-react",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "description": "DirectLink is a library for building single-page web applications that makes the world easier for ASP.NET Core developers who use React.",
     "author": {
         "name": "Andrei Molchanov",
@@ -17,10 +17,13 @@
         "directlink",
         "react",
         "signalr",
-        "aspnet.core",
-        "server-side rendering",
-        "server-side routing",
-        "real-time communications"
+        "net core",
+        "spa",
+        "ssr",
+        "single page application",
+        "server side rendering",
+        "real time communications",
+        "server side routing"
     ],
     "main": "src/directlink-react.js",
     "scripts": {

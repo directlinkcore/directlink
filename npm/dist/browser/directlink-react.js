@@ -80,7 +80,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 /*global React, ReactDOM, components, signalR*/
@@ -270,7 +270,7 @@ var directlink = {
             return directlink.hub.instance && directlink.hub.instance.connection.connectionId;
         },
         init: function init() {
-            var hub = new signalR.HubConnection('/directlink');
+            var hub = new signalR.HubConnectionBuilder().withUrl("/directlink").configureLogging(signalR.LogLevel.Information).build();
 
             hub.on("SetState", function (fullname, state) {
                 if (directlink.instances.hasOwnProperty(fullname)) {
@@ -293,7 +293,7 @@ var directlink = {
                     directlink.render(result.Data, true);
                     return;
                 }
-                throw result.StatusCode;
+                throw 'status code ' + result.StatusCode;
             });
             hub.on("InvokeResult", function (invocationId, response) {
                 var promise = directlink.promises[invocationId];
@@ -307,7 +307,7 @@ var directlink = {
                     }
                     return;
                 }
-                promise.reject(response && response.StatusCode || 'unexpected result');
+                promise.reject(response && response.StatusCode ? 'status code ' + response.StatusCode : 'unexpected result');
             });
             hub.on("AssetsUpdate", function () {
                 if (directlink.hmr) {
@@ -389,7 +389,7 @@ var directlink = {
     online: function online() {
         return new Promise(function (resolve, reject) {
             var hub = directlink.hub;
-            if (hub.instance.connection.connectionState === 2) {
+            if (hub.instance.connection.connectionState === 1) {
                 resolve();
                 return;
             }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -10,6 +10,7 @@ namespace DirectLinkCore
     {
         public static TemplateTags AddDefaultTemplateTags(this TemplateTags tags,
             string title,
+            string directlink = null,
             string signalR = null,
             bool addBootstrap = true,
             bool isDevelopment = false,
@@ -17,22 +18,23 @@ namespace DirectLinkCore
             bool hmr = false)
         {
             var min = isDevelopment ? "" : ".min";
-            var directlink = $"https://unpkg.com/directlink-react@1.0.3/dist/browser/directlink-react{min}.js";
+            if (directlink == null) {
+                directlink = $"https://unpkg.com/directlink-react@1.0.5/dist/browser/directlink-react{min}.js";
+            }
+            if (signalR == null) {
+                signalR = $"https://unpkg.com/@aspnet/signalr@1.0.4/dist/browser/signalr{min}.js";
+            }
             var polyfill = $"https://cdn.polyfill.io/v2/polyfill{min}.js";
             var jquery = $"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery{min}.js";
             var reactVersion = "16.2.0";
 
-            if (signalR == null) {
-                signalR = $"https://unpkg.com/@aspnet/signalr-client@1.0.0-alpha2-final/dist/browser/signalr-clientES5-1.0.0-alpha2-final{min}.js";
-            }
-
             tags.Title = title;
 
             if (addBootstrap) {
-                tags.Head.AddLink("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css", "sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb", "anonymous");
+                tags.Head.AddLink("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css", "sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm", "anonymous");
                 tags.Body
-                    .AddScript("https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js", "sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh", "anonymous")
-                    .AddScript("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js", "sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ", "anonymous");
+                    .AddScript("https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", "sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q", "anonymous")
+                    .AddScript("https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js", "sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl", "anonymous");
             }
             if (isDevelopment) {
                 tags.Head

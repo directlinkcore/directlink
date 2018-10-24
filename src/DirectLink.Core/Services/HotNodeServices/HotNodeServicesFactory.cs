@@ -1,5 +1,5 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.AspNetCore.NodeServices.HostingModels;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace DirectLinkCore
@@ -141,8 +142,7 @@ namespace DirectLinkCore
 
         private INodeInstance CreateNodeInstance(NodeServicesOptions options)
         {
-            return new HttpNodeInstance(options.ProjectPath, null, options.ApplicationStoppingToken, options.NodeInstanceOutputLogger,
-                options.EnvironmentVariables, options.InvocationTimeoutMilliseconds, options.LaunchWithDebugging, options.DebuggingPort, /* port */ 0);
+            return new HttpNodeInstance(options, /* port */ 0);
         }
 
         private void TrackMemoryUsage(CancellationToken token)
@@ -187,7 +187,7 @@ namespace DirectLinkCore
                 await WarmupService(newService, token);
                 if (_options.HotModuleReplacement && serviceIndex == _services.Length - 1) {
                     if (DirectLinkHub.HubContext != null) {
-                        await DirectLinkHub.HubContext.Clients.All.InvokeAsync(nameof(IDirectLinkHub.AssetsUpdate), new object[] { });
+                        await DirectLinkHub.HubContext.Clients.All.SendAsync(nameof(IDirectLinkHub.AssetsUpdate), new object[] { });
                     }
                 }
                 if (!_options.NodeServicesOptions.LaunchWithDebugging) {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -37,7 +37,7 @@ namespace DirectLinkCore
                 .UseStaticFiles()
                 .UseMiddleware<FaviconMiddleware>()
                 .UseWebSockets()
-                .UseSignalR(routes => { routes.MapHub<DirectLinkHub>("directlink"); });
+                .UseSignalR(routes => { routes.MapHub<DirectLinkHub>("/directlink"); });
         }
 
         public static IApplicationBuilder MapComponents(this IApplicationBuilder builder, Action<ConfigurationComponents> configureComponents)

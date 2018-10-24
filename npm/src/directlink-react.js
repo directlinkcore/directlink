@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 /*global React, ReactDOM, components, signalR*/
@@ -177,7 +177,10 @@ let directlink = {
         instance: null,
         connectionId: () => directlink.hub.instance && directlink.hub.instance.connection.connectionId,
         init: () => {
-            let hub = new signalR.HubConnection('/directlink');
+            let hub = new signalR.HubConnectionBuilder()
+                .withUrl("/directlink")
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
 
             hub.on("SetState", (fullname, state) => {
                 if (directlink.instances.hasOwnProperty(fullname)) {
@@ -198,7 +201,7 @@ let directlink = {
                     directlink.render(result.Data, true);
                     return;
                 }
-                throw result.StatusCode;
+                throw 'status code ' + result.StatusCode;
             });
             hub.on("InvokeResult", (invocationId, response) => {
                 let promise = directlink.promises[invocationId];
@@ -212,7 +215,7 @@ let directlink = {
                     }
                     return;
                 }
-                promise.reject(response && response.StatusCode || 'unexpected result');
+                promise.reject(response && response.StatusCode ? 'status code ' + response.StatusCode : 'unexpected result');
             });
             hub.on("AssetsUpdate", () => {
                 if (directlink.hmr) {
@@ -291,7 +294,7 @@ let directlink = {
 
     online: () => new Promise((resolve, reject) => {
         let hub = directlink.hub;
-        if (hub.instance.connection.connectionState === 2) {
+        if (hub.instance.connection.connectionState === 1) {
             resolve();
             return;
         }

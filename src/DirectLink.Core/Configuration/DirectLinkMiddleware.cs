@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -29,7 +29,7 @@ namespace DirectLinkCore
 
             var response = await routingService.GetResponseAsync(context);
             httpContext.Response.StatusCode = response.StatusCode;
-            httpContext.Response.Headers.Add("Cache-Control", "no-store");
+            httpContext.Response.Headers["Cache-Control"] = "no-store";
             if (response.Data != null) {
                 var dataJson = JsonConvert.SerializeObject(response.Data);
                 foreach (var style in response.Data.Styles) {

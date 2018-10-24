@@ -1,20 +1,21 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 
 namespace DirectLinkCore
 {
     public interface IDirectLinkHub
     {
-        void SetState(string fullname, object data);
+        Task SetState(string fullname, object data);
 
-        void Invoke(string fullname, string method, object[] args);
+        Task Invoke(string fullname, string method, object[] args);
 
-        void DataResponse(DataResponse dataResponse);
+        Task DataResponse(DataResponse dataResponse);
 
-        void InvokeResult(Guid invocationId, object result);
+        Task InvokeResult(Guid invocationId, object result);
 
-        void AssetsUpdate();
+        Task AssetsUpdate();
     }
 }

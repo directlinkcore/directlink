@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -112,7 +112,7 @@ namespace DirectLinkCore
         public async Task Link(string fullname, string name, object props)
         {
             if (IsLinkRequestLimited()) {
-                Context.Connection.Abort();
+                Context.Abort();
                 return;
             }
             if (string.IsNullOrWhiteSpace(fullname) || string.IsNullOrWhiteSpace(name)) {
@@ -139,14 +139,14 @@ namespace DirectLinkCore
                     return v;
                 });
             }
-            await this.Groups.AddAsync(Context.ConnectionId, fullname);
+            await this.Groups.AddToGroupAsync(Context.ConnectionId, fullname);
             await dispatcher?.OnConnectedAsync(Context.ConnectionId);
         }
 
         public async Task Unlink(string fullname, string name)
         {
             if (IsLinkRequestLimited()) {
-                Context.Connection.Abort();
+                Context.Abort();
                 return;
             }
             if (string.IsNullOrWhiteSpace(fullname) || string.IsNullOrWhiteSpace(name)) {
@@ -163,7 +163,7 @@ namespace DirectLinkCore
                 }
                 return v;
             });
-            await this.Groups.RemoveAsync(Context.ConnectionId, fullname);
+            await this.Groups.RemoveFromGroupAsync(Context.ConnectionId, fullname);
             var dispatcher = _provider.GetService(type) as IDirectLinkDispatcher<ViewModel>;
             if (dispatcher?.Connections.AddOrUpdate(fullname, new HashSet<string>(), (k, v) => {
                 if (v.Contains(Context.ConnectionId)) {
@@ -179,7 +179,7 @@ namespace DirectLinkCore
 
         public async Task RequestData(string path, string referer)
         {
-            var abortedToken = Context.Connection.ConnectionAbortedToken;
+            var abortedToken = Context.ConnectionAborted;
             if (abortedToken.IsCancellationRequested) {
                 return;
             }
@@ -187,14 +187,14 @@ namespace DirectLinkCore
                 return;
             }
 
-            var client = this.Clients.Client(Context.ConnectionId);
+            var client = this.Clients.Caller;
             if (await IsRequestLimited()) {
                 if (!abortedToken.IsCancellationRequested) {
-                    client.DataResponse(new DataResponse(StatusCodes.Status429TooManyRequests));
+                    await client.DataResponse(new DataResponse(StatusCodes.Status429TooManyRequests));
                 }
                 if (!TokenSources[Context.ConnectionId].Token.IsCancellationRequested) {
                     TokenSources[Context.ConnectionId].Cancel();
-                    Context.Connection.Abort();
+                    Context.Abort();
                 }
                 return;
             }
@@ -207,7 +207,7 @@ namespace DirectLinkCore
             var context = await GetDirectLinkContext(path, referer);
             var response = await _routingService.GetResponseAsync(context);
             if (!abortedToken.IsCancellationRequested) {
-                client.DataResponse(response);
+                await client.DataResponse(response);
             }
         }
 
@@ -215,7 +215,7 @@ namespace DirectLinkCore
         {
             var context = _provider.GetService<DirectLinkContext>();
             context.HubCallerContext = Context;
-            context.HttpContext = Context.Connection.GetHttpContext();
+            context.HttpContext = Context.GetHttpContext();
             context.Path = path;
             context.HubReferer = referer;
             if (_authenticationService != null) {
@@ -228,7 +228,7 @@ namespace DirectLinkCore
 
         public async Task Invoke(Guid invocationId, string fullname, string name, string method, object[] args)
         {
-            var abortedToken = Context.Connection.ConnectionAbortedToken;
+            var abortedToken = Context.ConnectionAborted;
             if (abortedToken.IsCancellationRequested) {
                 return;
             }
@@ -238,20 +238,20 @@ namespace DirectLinkCore
                 return;
             }
 
-            var client = this.Clients.Client(connectionId);
+            var client = this.Clients.Caller;
             if (await IsRequestLimited()) {
                 if (!abortedToken.IsCancellationRequested) {
-                    client.InvokeResult(invocationId, new { StatusCode = StatusCodes.Status429TooManyRequests });
+                    await client.InvokeResult(invocationId, new { StatusCode = StatusCodes.Status429TooManyRequests });
                 }
                 if (!TokenSources[connectionId].Token.IsCancellationRequested) {
                     TokenSources[connectionId].Cancel();
-                    Context.Connection.Abort();
+                    Context.Abort();
                 }
                 return;
             }
             if (string.IsNullOrWhiteSpace(fullname) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(method)) {
                 if (!abortedToken.IsCancellationRequested) {
-                    client.InvokeResult(invocationId, new { StatusCodes.Status400BadRequest });
+                    await client.InvokeResult(invocationId, new { StatusCodes.Status400BadRequest });
                 }
                 return;
             }
@@ -265,19 +265,19 @@ namespace DirectLinkCore
                 var response = await OnInvoke(link, method, args);
                 if (response.HasResult) {
                     if (!abortedToken.IsCancellationRequested) {
-                        client.InvokeResult(invocationId, new { response.StatusCode, response.Result });
+                        await client.InvokeResult(invocationId, new { response.StatusCode, response.Result });
                     }
                     return;
                 }
 
                 if (!abortedToken.IsCancellationRequested) {
-                    client.InvokeResult(invocationId, new { response.StatusCode });
+                    await client.InvokeResult(invocationId, new { response.StatusCode } );
                 }
             }
             catch (Exception ex) {
                 _logger.LogError(0, ex, $"Exception on Invoke: {connectionId} {fullname} {method}");
                 if (!abortedToken.IsCancellationRequested) {
-                    client.InvokeResult(invocationId, new { StatusCode = StatusCodes.Status500InternalServerError });
+                    await client.InvokeResult(invocationId, new { StatusCode = StatusCodes.Status500InternalServerError } );
                 }
             }
         }
@@ -310,12 +310,7 @@ namespace DirectLinkCore
                     }
                     RequestNextTime.AddOrUpdate(Context.ConnectionId, nextTime + _requestDelayTicks, time => time + _requestDelayTicks);
                     if (requestCount >= _requestsPerSecond - 1) {
-                        try {
-                            await Task.Delay((int)(timespan / 10000), TokenSources[Context.ConnectionId].Token);
-                        }
-                        catch (TaskCanceledException) {
-                            return true;
-                        }
+                        return true;
                     }
                     return false;
                 }
@@ -374,7 +369,7 @@ namespace DirectLinkCore
         {
             if (parameter != null) {
                 if (type.GetTypeInfo().IsClass) {
-                    if (type != typeof(string) && type != parameter.GetType()) {
+                    if (type != typeof(string) && type != typeof(HubCallerContext) && type != parameter.GetType()) {
                         parameter = JsonConvert.DeserializeObject(parameter.ToString(), type);
                     }
                 }

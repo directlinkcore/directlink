@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+﻿// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
@@ -64,7 +64,7 @@ namespace DirectLinkCore
 
         private static void SetUser(HubCallerContext context, ClaimsPrincipal user)
         {
-            var httpContext = context.Connection.GetHttpContext();
+            var httpContext = context.GetHttpContext();
             var authenticationFeature = httpContext.Features.Get<IHttpAuthenticationFeature>();
             authenticationFeature.User = user;
         }

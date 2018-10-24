@@ -1,9 +1,8 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Copyright (c) 2017 Andrei Molchanov. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) 2018 Andrei Molchanov. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -12,8 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices;
 using Microsoft.AspNetCore.NodeServices.HostingModels;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace DirectLinkCore
 {
@@ -28,29 +27,34 @@ namespace DirectLinkCore
     /// <seealso cref="Microsoft.AspNetCore.NodeServices.HostingModels.OutOfProcessNodeInstance" />
     internal class HttpNodeInstance : OutOfProcessNodeInstance
     {
-        private static readonly Regex PortMessageRegex =
-            new Regex(@"^\[Microsoft.AspNetCore.NodeServices.HttpNodeHost:Listening on port (\d+)\]$");
+        private static readonly Regex EndpointMessageRegex =
+            new Regex(@"^\[Microsoft.AspNetCore.NodeServices.HttpNodeHost:Listening on {(.*?)} port (\d+)\]$");
+
+        private static readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            TypeNameHandling = TypeNameHandling.None
+        };
 
         private readonly HttpClient _client;
         private bool _disposed;
-        private int _portNumber;
+        private string _endpoint;
 
-        public HttpNodeInstance(string projectPath, string[] watchFileExtensions, CancellationToken applicationStoppingToken, ILogger nodeOutputLogger,
-            IDictionary<string, string> environmentVars, int invocationTimeoutMilliseconds, bool launchWithDebugging,
-            int debuggingPort, int port = 0)
-            : base(EmbeddedResourceReader.Read(typeof(OutOfProcessNodeInstance), "/Content/Node/entrypoint-http.js"),
-                projectPath,
-                watchFileExtensions,
+        public HttpNodeInstance(NodeServicesOptions options, int port = 0)
+        : base(
+                EmbeddedResourceReader.Read(typeof(OutOfProcessNodeInstance), "/Content/Node/entrypoint-http.js"),
+                options.ProjectPath,
+                options.WatchFileExtensions,
                 MakeCommandLineOptions(port),
-                applicationStoppingToken,
-                nodeOutputLogger,
-                environmentVars,
-                invocationTimeoutMilliseconds,
-                launchWithDebugging,
-                debuggingPort)
+                options.ApplicationStoppingToken,
+                options.NodeInstanceOutputLogger,
+                options.EnvironmentVariables,
+                options.InvocationTimeoutMilliseconds,
+                options.LaunchWithDebugging,
+                options.DebuggingPort)
         {
             _client = new HttpClient();
-            _client.Timeout = TimeSpan.FromMilliseconds(invocationTimeoutMilliseconds + 1000);
+            _client.Timeout = TimeSpan.FromMilliseconds(options.InvocationTimeoutMilliseconds + 1000);
         }
 
         private static string MakeCommandLineOptions(int port)
@@ -58,29 +62,36 @@ namespace DirectLinkCore
             return $"--port {port}";
         }
 
-        protected override async Task<T> InvokeExportAsync<T>(NodeInvocationInfo invocationInfo, CancellationToken cancellationToken)
+        protected override async Task<T> InvokeExportAsync<T>(
+            NodeInvocationInfo invocationInfo, CancellationToken cancellationToken)
         {
             StringContent payload;
             if (invocationInfo.Args.Length == 1 && invocationInfo.Args[0].GetType() == typeof(StringContent)) {
                 payload = (StringContent)invocationInfo.Args[0];
             }
             else {
-                var payloadJson = JsonConvert.SerializeObject(new NodeInvocationInfoLower(invocationInfo));
+                var payloadJson = JsonConvert.SerializeObject(invocationInfo, jsonSerializerSettings);
                 payload = new StringContent(payloadJson, Encoding.UTF8, "application/json");
             }
-            var response = await _client.PostAsync("http://localhost:" + _portNumber, payload, cancellationToken);
 
-            if (!response.IsSuccessStatusCode) {
+            var response = await _client.PostAsync(_endpoint, payload, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
                 // Unfortunately there's no true way to cancel ReadAsStringAsync calls, hence AbandonIfCancelled
-                var responseErrorString = await response.Content.ReadAsStringAsync().OrThrowOnCancellation(cancellationToken);
-                throw new Exception("Call to Node module failed with error: " + responseErrorString);
+                var responseJson = await response.Content.ReadAsStringAsync().OrThrowOnCancellation(cancellationToken);
+                var responseError = JsonConvert.DeserializeObject<RpcJsonResponse>(responseJson, jsonSerializerSettings);
+
+                throw new NodeInvocationException(responseError.ErrorMessage, responseError.ErrorDetails);
             }
 
             var responseContentType = response.Content.Headers.ContentType;
-            switch (responseContentType.MediaType) {
+            switch (responseContentType.MediaType)
+            {
                 case "text/plain":
                     // String responses can skip JSON encoding/decoding
-                    if (typeof(T) != typeof(string)) {
+                    if (typeof(T) != typeof(string))
+                    {
                         throw new ArgumentException(
                             "Node module responded with non-JSON string. This cannot be converted to the requested generic type: " +
                             typeof(T).FullName);
@@ -91,11 +102,12 @@ namespace DirectLinkCore
 
                 case "application/json":
                     var responseJson = await response.Content.ReadAsStringAsync().OrThrowOnCancellation(cancellationToken);
-                    return JsonConvert.DeserializeObject<T>(responseJson);
+                    return JsonConvert.DeserializeObject<T>(responseJson, jsonSerializerSettings);
 
                 case "application/octet-stream":
                     // Streamed responses have to be received as System.IO.Stream instances
-                    if (typeof(T) != typeof(Stream)) {
+                    if (typeof(T) != typeof(Stream) && typeof(T) != typeof(object))
+                    {
                         throw new ArgumentException(
                             "Node module responded with binary stream. This cannot be converted to the requested generic type: " +
                             typeof(T).FullName + ". Instead you must use the generic type System.IO.Stream.");
@@ -110,14 +122,22 @@ namespace DirectLinkCore
 
         protected override void OnOutputDataReceived(string outputData)
         {
-            // Watch for "port selected" messages, and when observed, store the port number
+            // Watch for "port selected" messages, and when observed, 
+            // store the IP (IPv4/IPv6) and port number
             // so we can use it when making HTTP requests. The child process will always send
             // one of these messages before it sends a "ready for connections" message.
-            var match = _portNumber != 0 ? null : PortMessageRegex.Match(outputData);
-            if (match != null && match.Success) {
-                _portNumber = int.Parse(match.Groups[1].Captures[0].Value);
+            var match = string.IsNullOrEmpty(_endpoint) ? EndpointMessageRegex.Match(outputData) : null;
+            if (match != null && match.Success)
+            {
+                var port = int.Parse(match.Groups[2].Captures[0].Value);
+                var resolvedIpAddress = match.Groups[1].Captures[0].Value;
+
+                //IPv6 must be wrapped with [] brackets
+                resolvedIpAddress = resolvedIpAddress == "::1" ? $"[{resolvedIpAddress}]" : resolvedIpAddress;
+                _endpoint = $"http://{resolvedIpAddress}:{port}";
             }
-            else {
+            else
+            {
                 base.OnOutputDataReceived(outputData);
             }
         }
@@ -126,46 +146,23 @@ namespace DirectLinkCore
         {
             base.Dispose(disposing);
 
-            if (!_disposed) {
-                if (disposing) {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
                     _client.Dispose();
                 }
 
                 _disposed = true;
             }
         }
-    }
 
-    internal static class TaskExtensions
-    {
-        public static Task<T> OrThrowOnCancellation<T>(this Task<T> task, CancellationToken cancellationToken)
+#pragma warning disable 649 // These properties are populated via JSON deserialization
+        private class RpcJsonResponse
         {
-            return task.IsCompleted
-                ? task // If the task is already completed, no need to wrap it in a further layer of task
-                : task.ContinueWith(
-                    t => t.Result, // If the task completes, pass through its result
-                    cancellationToken,
-                    TaskContinuationOptions.ExecuteSynchronously,
-                    TaskScheduler.Default);
+            public string ErrorMessage { get; set; }
+            public string ErrorDetails { get; set; }
         }
-    }
-
-    internal class NodeInvocationInfoLower
-    {
-        public NodeInvocationInfoLower(NodeInvocationInfo nodeInvocationInfo)
-        {
-            ModuleName = nodeInvocationInfo.ModuleName;
-            ExportedFunctionName = nodeInvocationInfo.ExportedFunctionName;
-            Args = nodeInvocationInfo.Args;
-        }
-
-        [JsonProperty(PropertyName = "moduleName")]
-        public string ModuleName { get; set; }
-
-        [JsonProperty(PropertyName = "exportedFunctionName")]
-        public string ExportedFunctionName { get; set; }
-
-        [JsonProperty(PropertyName = "args")]
-        public object[] Args { get; set; }
+#pragma warning restore 649
     }
 }
