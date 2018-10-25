@@ -1,6 +1,7 @@
 let path = require('path');
 
-module.exports = [{
+module.exports = {
+    mode: 'development',
     entry: { app: 'app.jsx' },
     output: {
         path: path.join(__dirname, 'wwwroot/dist'),
@@ -14,11 +15,16 @@ module.exports = [{
         'react-dom': 'ReactDOM'
     },
     module: {
-        loaders: [{
+        rules: [{
             test: /\.jsx?$/,
             exclude: /node_modules/,
-            loader: 'babel-loader',
-            query: { presets: ['es2015', 'react'], plugins: ['transform-class-properties'] }
-        }],
+            use: {
+                loader: 'babel-loader',
+                options: {
+                    presets: ['@babel/preset-env', '@babel/preset-react'],
+                    plugins: ['@babel/plugin-proposal-class-properties']
+                }
+            }
+        }]
     }
-}];
+};

@@ -1,11 +1,11 @@
 'use strict';
 
 let path = require('path');
-let webpack = require('webpack');
 let AssetsPlugin = require('assets-webpack-plugin');
 let WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 
-module.exports = [{
+module.exports = {
+    mode: 'development',
     entry: {
         routing: 'routing.jsx',
         company: 'company.jsx',
@@ -19,11 +19,16 @@ module.exports = [{
     resolve: { modules: ['clientApp', 'node_modules'] },
     externals: { 'react': 'React', 'react-dom': 'ReactDOM' },
     module: {
-        loaders: [{
+        rules: [{
             test: /\.jsx?$/,
             exclude: /node_modules/,
-            loader: 'babel-loader',
-            query: { presets: ['es2015', 'react'], plugins: ['transform-class-properties'] }
+            use: {
+                loader: 'babel-loader',
+                options: {
+                    presets: ['@babel/preset-env', '@babel/preset-react'],
+                    plugins: ['@babel/plugin-proposal-class-properties']
+                }
+            }
         }]
     },
     plugins: [
@@ -35,4 +40,4 @@ module.exports = [{
             update: true
         })
     ]
-}];
+};

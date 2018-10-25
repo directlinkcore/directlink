@@ -36,12 +36,32 @@
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
 /******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -59,109 +79,22 @@
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./clientApp/app.jsx");
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/******/ ({
 
-"use strict";
+/***/ "./clientApp/app.jsx":
+/*!***************************!*\
+  !*** ./clientApp/app.jsx ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
 
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-components.App = function (_React$Component) {
-    _inherits(App, _React$Component);
-
-    function App(props) {
-        _classCallCheck(this, App);
-
-        var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
-
-        _this.sendMessage = function () {
-            _this.AddMessage(_this.state.message) //here we invoke App.AddMessage method
-            .then(function () {
-                return _this.setState({ message: '' });
-            });
-        };
-
-        _this.onChange = function (event) {
-            _this.setState(_defineProperty({}, event.target.name, event.target.value));
-        };
-
-        _this.onKeyPress = function (event) {
-            if (event.key === 'Enter') {
-                _this.sendMessage();
-            }
-        };
-
-        directlink.init(_this);
-        return _this;
-    }
-
-    _createClass(App, [{
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {
-            directlink.dispose(this);
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            return React.createElement(
-                'div',
-                { className: 'jumbotron' },
-                React.createElement(
-                    'div',
-                    { className: 'row mb-3' },
-                    React.createElement(
-                        'div',
-                        { className: 'col-12 col-sm-8 col-md-9 col-lg-10 mb-3 mb-sm-0' },
-                        React.createElement('input', { type: 'text', className: 'form-control', name: 'message',
-                            placeholder: 'message', autoComplete: 'off',
-                            value: this.state.message, onChange: this.onChange, onKeyPress: this.onKeyPress })
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'col-12 col-sm-4 col-md-3 col-lg-2' },
-                        React.createElement(
-                            'button',
-                            { type: 'button', className: 'btn btn-primary w-100',
-                                onClick: this.sendMessage },
-                            'Send'
-                        )
-                    )
-                ),
-                React.createElement(
-                    'ul',
-                    { className: 'list-unstyled' },
-                    this.state.Messages.slice().reverse().map(function (message) {
-                        return React.createElement(
-                            'li',
-                            { key: message.Id },
-                            React.createElement(
-                                'div',
-                                { className: 'alert alert-primary' },
-                                message.Text
-                            )
-                        );
-                    })
-                )
-            );
-        }
-    }]);
-
-    return App;
-}(React.Component);
+eval("function _typeof(obj) { if (typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === \"function\" && obj.constructor === Symbol && obj !== Symbol.prototype ? \"symbol\" : typeof obj; }; } return _typeof(obj); }\n\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n\nfunction _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \"object\" || typeof call === \"function\")) { return call; } return _assertThisInitialized(self); }\n\nfunction _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }\n\nfunction _inherits(subClass, superClass) { if (typeof superClass !== \"function\" && superClass !== null) { throw new TypeError(\"Super expression must either be null or a function\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }\n\nfunction _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }\n\nfunction _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\"this hasn't been initialised - super() hasn't been called\"); } return self; }\n\nfunction _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }\n\ncomponents.App =\n/*#__PURE__*/\nfunction (_React$Component) {\n  _inherits(App, _React$Component);\n\n  function App(props) {\n    var _this;\n\n    _classCallCheck(this, App);\n\n    _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this, props));\n\n    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), \"sendMessage\", function () {\n      _this.AddMessage(_this.state.message) //here we invoke App.AddMessage method\n      .then(function () {\n        return _this.setState({\n          message: ''\n        });\n      });\n    });\n\n    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), \"onChange\", function (event) {\n      _this.setState(_defineProperty({}, event.target.name, event.target.value));\n    });\n\n    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), \"onKeyPress\", function (event) {\n      if (event.key === 'Enter') {\n        _this.sendMessage();\n      }\n    });\n\n    directlink.init(_assertThisInitialized(_assertThisInitialized(_this)));\n    return _this;\n  }\n\n  _createClass(App, [{\n    key: \"componentWillUnmount\",\n    value: function componentWillUnmount() {\n      directlink.dispose(this);\n    }\n  }, {\n    key: \"render\",\n    value: function render() {\n      return React.createElement(\"div\", {\n        className: \"jumbotron\"\n      }, React.createElement(\"div\", {\n        className: \"row mb-3\"\n      }, React.createElement(\"div\", {\n        className: \"col-12 col-sm-8 col-md-9 col-lg-10 mb-3 mb-sm-0\"\n      }, React.createElement(\"input\", {\n        type: \"text\",\n        className: \"form-control\",\n        name: \"message\",\n        placeholder: \"message\",\n        autoComplete: \"off\",\n        value: this.state.message,\n        onChange: this.onChange,\n        onKeyPress: this.onKeyPress\n      })), React.createElement(\"div\", {\n        className: \"col-12 col-sm-4 col-md-3 col-lg-2\"\n      }, React.createElement(\"button\", {\n        type: \"button\",\n        className: \"btn btn-primary w-100\",\n        onClick: this.sendMessage\n      }, \"Send\"))), React.createElement(\"ul\", {\n        className: \"list-unstyled\"\n      }, this.state.Messages.slice().reverse().map(function (message) {\n        return React.createElement(\"li\", {\n          key: message.Id\n        }, React.createElement(\"div\", {\n          className: \"alert alert-primary\"\n        }, message.Text));\n      })));\n    }\n  }]);\n\n  return App;\n}(React.Component);\n\n//# sourceURL=webpack:///./clientApp/app.jsx?");
 
 /***/ })
-/******/ ]);
+
+/******/ });
