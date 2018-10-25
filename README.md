@@ -15,6 +15,8 @@ Library for building single-page web applications that makes the world easier fo
 Create `ASP.NET Core` project and add package:
 ```sh
 dotnet new web -o Sample && cd Sample
+dotnet remove package Microsoft.AspNetCore.App
+dotnet add package Microsoft.AspNetCore.App -v 2.1.5
 dotnet add package DirectLink.Core.React
 ```
 
@@ -22,8 +24,8 @@ Initialize npm and install packages:
 ```sh
 npm init -y
 npm install directlink-react
-npm install -D babel-core babel-loader webpack
-npm install -D babel-preset-es2015 babel-preset-react babel-plugin-transform-class-properties
+npm install -D @babel/core babel-loader webpack webpack-cli
+npm install -D @babel/preset-env @babel/preset-react @babel/plugin-proposal-class-properties
 ```
 
 <details>
@@ -41,15 +43,16 @@ npm install -D babel-preset-es2015 babel-preset-react babel-plugin-transform-cla
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "directlink-react": "1.0.1"
+        "directlink-react": "1.0.5"
     },
     "devDependencies": {
-        "babel-core": "6.26.0",
-        "babel-loader": "7.1.2",
-        "babel-plugin-transform-class-properties": "6.24.1",
-        "babel-preset-es2015": "6.24.1",
-        "babel-preset-react": "6.24.1",
-        "webpack": "3.10.0"
+        "@babel/core": "7.1.2",
+        "@babel/plugin-proposal-class-properties": "7.1.0",
+        "@babel/preset-env": "7.1.0",
+        "@babel/preset-react": "7.0.0",
+        "babel-loader": "8.0.4",
+        "webpack": "4.23.1",
+        "webpack-cli": "3.1.2"
     }
 }
 ```
@@ -61,7 +64,8 @@ npm install -D babel-preset-es2015 babel-preset-react babel-plugin-transform-cla
 ```js
 let path = require('path');
 
-module.exports = [{
+module.exports = {
+    mode: 'development',
     entry: { app: 'app.jsx' },
     output: {
         path: path.join(__dirname, 'wwwroot/dist'),
@@ -75,14 +79,19 @@ module.exports = [{
         'react-dom': 'ReactDOM'
     },
     module: {
-        loaders: [{
+        rules: [{
             test: /\.jsx?$/,
             exclude: /node_modules/,
-            loader: 'babel-loader',
-            query: { presets: ['es2015', 'react'], plugins: ['transform-class-properties'] }
-        }],
+            use: {
+                loader: 'babel-loader',
+                options: {
+                    presets: ['@babel/preset-env', '@babel/preset-react'],
+                    plugins: ['@babel/plugin-proposal-class-properties']
+                }
+            }
+        }]
     }
-}];
+};
 ```
 </details>
 <br>
